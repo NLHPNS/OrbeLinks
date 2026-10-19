@@ -1,0 +1,12 @@
+{
+  "name": "orbelinks",
+  "private": true,
+  "version": "0.1.0",
+  "description": "A cross-device personal productivity application",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "echo \"No tests configured yet\""
+  }
+}
