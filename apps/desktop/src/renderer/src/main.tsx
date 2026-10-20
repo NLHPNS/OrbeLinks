@@ -16,15 +16,10 @@ if (rootElement == null) {
 
 const r = createRoot(rootElement);
 
-// const confirmedDelete = window.confirm("Delete this note?");
-
 // component for React
 function App() {
     const name = "OrbeLinks";
-    const [note, setNote] = useState({
-        title:'',
-        content:''
-    }); // for updating title
+    
     // create a note list
     const [notes, setNotes] = useState<Note[]>([
         {
@@ -82,32 +77,22 @@ function App() {
                 <p>Select a note to view its content.</p>
             )}
 
-            {/* <p>Title: {note.title}</p>
-            <p>Content: {note.content}</p> */}
-
             <button onClick={() => setNotes([...notes, {
                 id: crypto.randomUUID(),
                 title: "<New Note>",
                 content: ""
             }])}>Add Note</button>
 
-            <button>Delete Note</button>
-
-            {/* <input 
-                type="text"
-                value={note.title}
-                onChange={(event) => setNote({
-                    ...note,
-                    title: event.target.value
-                })}
-            />
-            <textarea
-                value={note.content}
-                onChange={(event) => setNote({
-                    ...note,
-                    content: event.target.value
-                })}
-            /> */}
+            <button onClick={() => {
+                if (selectedNote == null) return;
+                const confirmDelete = window.confirm("Delete this note?");
+                if (confirmDelete) {
+                    setNotes(notes.filter((item) => 
+                        item.id !== selectedNote.id
+                    ))
+                    setSelectedNote(null);
+                }
+            }}>Delete Note</button>
             
             {/* note list */}
             <ul>
