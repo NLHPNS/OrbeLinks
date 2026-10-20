@@ -3,11 +3,10 @@ import { useState } from 'react';
 
 // note composition
 type Note = {
+    id: string,
     title: string,
     content: string
 };
-
-
 
 const rootElement = document.getElementById('root');
 
@@ -16,6 +15,8 @@ if (rootElement == null) {
 }
 
 const r = createRoot(rootElement);
+
+// const confirmedDelete = window.confirm("Delete this note?");
 
 // component for React
 function App() {
@@ -27,11 +28,13 @@ function App() {
     // create a note list
     const [notes, setNotes] = useState<Note[]>([
         {
-            title: "jiangxuefeng",
-            content: "Math"
+            id: "thisisarandomId",
+            title: "test01",
+            content: "this is the content of test01"
         },
         {
-            title: "test",
+            id: "veryrandomID",
+            title: "sigmaboy",
             content: "676767"
         }
     ]);
@@ -42,10 +45,38 @@ function App() {
         <div>
             <h1>Hello, {name}!</h1>
 
+            {/* display selected note */}
             {selectedNote !== null ? (
                 <div>
-                    <h2>{selectedNote.title}</h2>
-                    <p>{selectedNote.content}</p>
+                    <input
+                        value={selectedNote.title}
+                        onChange={(event) => {
+                            const updatedNote = {
+                                ...selectedNote,
+                                title: event.target.value
+                            }
+                            setSelectedNote(updatedNote)
+                            //  update note to notes
+                            setNotes(notes.map((item) => 
+                                item.id === updatedNote.id ? updatedNote : item
+                            ))
+                        }}
+                    />
+                    <textarea
+                        value={selectedNote.content}
+                        onChange={(event) => {
+                            const updateNote = {
+                                ...selectedNote,
+                                content: event.target.value
+                            }
+                            setSelectedNote(updateNote)
+                            setNotes(notes.map((item) =>
+                                item.id === updateNote.id ? updateNote : item
+                            ))
+                        }}
+                    />
+
+                    <p>{selectedNote.id}</p>
                 </div>
             ) : (
                 <p>Select a note to view its content.</p>
@@ -55,13 +86,14 @@ function App() {
             <p>Content: {note.content}</p> */}
 
             <button onClick={() => setNotes([...notes, {
+                id: crypto.randomUUID(),
                 title: "<New Note>",
                 content: ""
             }])}>Add Note</button>
 
             <button>Delete Note</button>
 
-            <input 
+            {/* <input 
                 type="text"
                 value={note.title}
                 onChange={(event) => setNote({
@@ -75,13 +107,14 @@ function App() {
                     ...note,
                     content: event.target.value
                 })}
-            />
+            /> */}
             
+            {/* note list */}
             <ul>
                 {/* go through the whole list, generate list items one by one*/}
                 {notes.map((item, index) => (
                     <li 
-                        key={index}
+                        key={item.id}
                         onClick={() => setSelectedNote(item)}
                     >
                         {item.title}
