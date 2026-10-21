@@ -19,7 +19,7 @@ const r = createRoot(rootElement);
 // component for React
 function App() {
     const name = "OrbeLinks";
-    
+
     // create a note list
     const [notes, setNotes] = useState<Note[]>([
         {
@@ -36,9 +36,42 @@ function App() {
     // selecting a note
     const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
+    const [mainMessage, setMainMessage] = useState('');
+    const [saveMessage, setSaveMessage] = useState('');
+
+
     return (
         <div>
+            <p>{window.orbeLinks.getAppName()}</p>
+            {/* <p>Renderer is working</p> */}
             <h1>Hello, {name}!</h1>
+
+            <button
+                onClick={async () => {
+                    const message = await window.orbeLinks.getMainMessage();
+                    setMainMessage(message);
+                }}
+            >Ask main</button>
+            <p>Main message: {mainMessage}</p>
+
+            <button
+                onClick={async () => {
+                    // check null
+                    if (!selectedNote) {
+                        setSaveMessage('Please select a note first');
+                        return;
+                    }
+
+                    const result = await window.orbeLinks.saveNote(selectedNote);
+
+                    if (result.success) {
+                        setSaveMessage('Note saved successfully!');
+                    } else {
+                        setSaveMessage('Fail to save note');
+                    }
+                }}
+            >test save</button>
+            <p>{saveMessage}</p>
 
             {/* display selected note */}
             {selectedNote !== null ? (
@@ -52,7 +85,7 @@ function App() {
                             }
                             setSelectedNote(updatedNote)
                             //  update note to notes
-                            setNotes(notes.map((item) => 
+                            setNotes(notes.map((item) =>
                                 item.id === updatedNote.id ? updatedNote : item
                             ))
                         }}
@@ -87,18 +120,18 @@ function App() {
                 if (selectedNote == null) return;
                 const confirmDelete = window.confirm("Delete this note?");
                 if (confirmDelete) {
-                    setNotes(notes.filter((item) => 
+                    setNotes(notes.filter((item) =>
                         item.id !== selectedNote.id
                     ))
                     setSelectedNote(null);
                 }
             }}>Delete Note</button>
-            
+
             {/* note list */}
             <ul>
                 {/* go through the whole list, generate list items one by one*/}
                 {notes.map((item, index) => (
-                    <li 
+                    <li
                         key={item.id}
                         onClick={() => setSelectedNote(item)}
                     >
@@ -109,9 +142,8 @@ function App() {
 
         </div>
 
-        
+
     );
 }
-
 
 r.render(<App />);
