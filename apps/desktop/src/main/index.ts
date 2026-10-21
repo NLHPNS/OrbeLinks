@@ -1,5 +1,20 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import { join } from 'node:path';
+import Database from 'better-sqlite3';
+
+
+const dbPath = join(app.getPath('userData'), 'orbelinks.db');
+
+const db = new Database(dbPath);
+
+// create SQLite table
+db.exec(`
+    CREATE TABLE IF NOT EXISTS notes (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL DEFAULT ''
+    )    
+`);
 
 function createWindow() {
     const mainWindow = new BrowserWindow({
@@ -23,6 +38,16 @@ ipcMain.handle('app:get-message', () => {
 
 ipcMain.handle('notes:save', (_event, note) => {
     console.log("received note: ", note);
+    const dataPrepare = db.prepare(`
+        INSERT INTO notes (id, title, content)
+        VALUES (?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+            title = excluded.title,
+            content = excluded.content;
+    `);
+
+    dataPrepare.run(note.id, note.title, note.content);
+
     return {success: true};
 });
 
