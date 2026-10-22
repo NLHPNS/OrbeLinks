@@ -48,6 +48,9 @@ function createWindow() {
 electron.ipcMain.handle("app:get-message", () => {
 	return "Hello from Main!";
 });
+electron.ipcMain.handle("notes:get-all", () => {
+	return db.prepare(`SELECT * FROM NOTES`).all();
+});
 electron.ipcMain.handle("notes:save", (_event, note) => {
 	console.log("received note: ", note);
 	db.prepare(`
@@ -58,6 +61,9 @@ electron.ipcMain.handle("notes:save", (_event, note) => {
             content = excluded.content;
     `).run(note.id, note.title, note.content);
 	return { success: true };
+});
+electron.ipcMain.handle("notes:delete", (_event, id) => {
+	return { success: db.prepare("DELETE FROM notes WHERE id = ?").run(id).changes > 0 };
 });
 electron.app.whenReady().then(createWindow);
 //#endregion

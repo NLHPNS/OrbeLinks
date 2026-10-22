@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // note composition
 type Note = {
@@ -14,25 +14,27 @@ if (rootElement == null) {
     throw new Error("Root element not found");
 }
 
+
 const r = createRoot(rootElement);
 
 // component for React
 function App() {
     const name = "OrbeLinks";
 
-    // create a note list
-    const [notes, setNotes] = useState<Note[]>([
-        {
-            id: "thisisarandomId",
-            title: "test01",
-            content: "this is the content of test01"
-        },
-        {
-            id: "veryrandomID",
-            title: "sigmaboy",
-            content: "676767"
+    // create a empty note list
+    const [notes, setNotes] = useState<Note[]>([]);
+
+    // load notes from SQLite
+    useEffect(() => {
+        async function loadNotes() {
+            const savedNotes = await window.orbeLinks.getAllNotes();
+            setNotes(savedNotes);
         }
-    ]);
+
+        loadNotes();
+    }, []);
+
+    
     // selecting a note
     const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
@@ -110,21 +112,38 @@ function App() {
                 <p>Select a note to view its content.</p>
             )}
 
-            <button onClick={() => setNotes([...notes, {
-                id: crypto.randomUUID(),
-                title: "<New Note>",
-                content: ""
-            }])}>Add Note</button>
+            {/* add a note */}
+            <button onClick={async () => {
+                const newNote: Note = {
+                    id: crypto.randomUUID(),
+                    title: '<New Note>',
+                    content: ''
+                };
 
-            <button onClick={() => {
+                // save to SQlite
+                await window.orbeLinks.saveNote(newNote);
+
+                // update React state
+                setNotes([...notes, newNote]);
+            }}
+            >Add Note</button>
+
+            <button onClick={async () => {
                 if (selectedNote == null) return;
+
                 const confirmDelete = window.confirm("Delete this note?");
-                if (confirmDelete) {
-                    setNotes(notes.filter((item) =>
-                        item.id !== selectedNote.id
-                    ))
-                    setSelectedNote(null);
+                if (!confirmDelete) return; 
+                
+                const result = await window.orbeLinks.deleteNote(selectedNote.id);
+
+                if (result.success) {
+                    setNotes(notes.filter(
+                        (item) => item.id !== selectedNote.id
+                    ));
                 }
+                setSelectedNote(null);
+
+
             }}>Delete Note</button>
 
             {/* note list */}

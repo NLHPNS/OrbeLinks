@@ -36,6 +36,10 @@ ipcMain.handle('app:get-message', () => {
     return 'Hello from Main!';
 });
 
+ipcMain.handle('notes:get-all', () => {
+    return db.prepare(`SELECT * FROM NOTES`).all();
+});
+
 ipcMain.handle('notes:save', (_event, note) => {
     console.log("received note: ", note);
     const dataPrepare = db.prepare(`
@@ -49,6 +53,15 @@ ipcMain.handle('notes:save', (_event, note) => {
     dataPrepare.run(note.id, note.title, note.content);
 
     return {success: true};
+});
+
+ipcMain.handle('notes:delete', (_event, id) => {
+    const result = db.prepare(
+        'DELETE FROM notes WHERE id = ?'
+    ).run(id);
+
+    // .run will return an object with attribute 'changes'
+    return {success: result.changes > 0}
 });
 
 app.whenReady().then(createWindow);
