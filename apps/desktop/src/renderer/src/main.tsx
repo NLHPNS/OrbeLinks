@@ -58,21 +58,28 @@ function App() {
 
             <button
                 onClick={async () => {
-                    // check null
-                    if (!selectedNote) {
-                        setSaveMessage('Please select a note first');
-                        return;
+                    // only save the changed note
+                    const allNotes = await window.orbeLinks.getAllNotes();
+
+                    for (const note of notes) {
+                        const savedNote = allNotes.find(
+                            (item) => item.id === note.id
+                        );
+
+                        // !saveNote -> not null
+                        if (
+                            !savedNote ||
+                            savedNote.title !== note.title ||
+                            savedNote.content !== note.content
+                        ) {
+                            await window.orbeLinks.saveNote(note);
+                        }
+                        
                     }
 
-                    const result = await window.orbeLinks.saveNote(selectedNote);
-
-                    if (result.success) {
-                        setSaveMessage('Note saved successfully!');
-                    } else {
-                        setSaveMessage('Fail to save note');
-                    }
+                    setSaveMessage('All notes saved successfully!');
                 }}
-            >test save</button>
+            >Save</button>
             <p>{saveMessage}</p>
 
             {/* display selected note */}
@@ -121,7 +128,7 @@ function App() {
                 };
 
                 // save to SQlite
-                await window.orbeLinks.saveNote(newNote);
+                // await window.orbeLinks.saveNote(newNote);
 
                 // update React state
                 setNotes([...notes, newNote]);
